@@ -1,6 +1,7 @@
 const url = require('url');
 const http = require('http');
 const path = require('path');
+const fs = require('fs');
 
 const server = new http.Server();
 
@@ -11,6 +12,28 @@ server.on('request', (req, res) => {
 
   switch (req.method) {
     case 'GET':
+      fs.readFile(filepath, (err, data) => {
+        console.log(filepath);
+        if (err) {
+          if (err.code === 'ENOENT') {
+            const match = pathname.match(/\//g);
+
+            if (match && match.length >= 1) {
+              res.statusCode = 400;
+              res.end('Subfolder Not Support');
+            } else {
+              res.statusCode = 404;
+              res.end('Not Found');
+            }
+          } else {
+            res.statusCode = 500;
+            res.end('Error');
+          }
+        } else {
+          res.statusCode = 200;
+          res.end(data);
+        }
+      });
 
       break;
 
